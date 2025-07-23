@@ -1,0 +1,58 @@
+# Enable CORS for all requests
+Header always set Access-Control-Allow-Origin "http://localhost:8000"
+Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+Header always set Access-Control-Allow-Credentials "true"
+
+# Handle preflight OPTIONS requests
+RewriteEngine On
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=200,L]
+
+# Enable error reporting for development
+php_flag display_errors on
+php_value error_reporting E_ALL
+
+# Set default charset
+AddDefaultCharset UTF-8
+
+# Security headers
+Header always set X-Content-Type-Options nosniff
+Header always set X-Frame-Options DENY
+Header always set X-XSS-Protection "1; mode=block"
+
+# File upload limits
+php_value upload_max_filesize 10M
+php_value post_max_size 10M
+php_value max_execution_time 300
+php_value max_input_time 300
+
+# Directory browsing
+Options -Indexes
+
+# Protect sensitive files
+<Files "*.sql">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "*.log">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# URL Rewriting for clean API endpoints
+RewriteEngine On
+
+# API Routes
+RewriteRule ^api/auth/?$ api/auth.php [L,QSA]
+RewriteRule ^api/templates/?$ api/templates.php [L,QSA]
+RewriteRule ^api/templates/([0-9]+)/?$ api/templates.php?id=$1 [L,QSA]
+RewriteRule ^api/documents/?$ api/documents.php [L,QSA]
+RewriteRule ^api/documents/([0-9]+)/?$ api/documents.php?id=$1 [L,QSA]
+RewriteRule ^api/documents/([0-9]+)/preview/?$ api/documents.php?id=$1&action=preview [L,QSA]
+RewriteRule ^api/documents/([0-9]+)/export/([a-z]+)/?$ api/documents.php?id=$1&action=export&format=$2 [L,QSA]
+RewriteRule ^api/documents/([0-9]+)/signature/?$ api/documents.php?document_id=$1&action=upload_signature [L,QSA]
+RewriteRule ^api/audit-logs/?$ api/audit-logs.php [L,QSA]
+RewriteRule ^api/employees/?$ api/employees.php [L,QSA]
+RewriteRule ^api/employees/([A-Za-z0-9]+)/?$ api/employees.php?employee_id=$1 [L,QSA]
